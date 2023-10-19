@@ -16,6 +16,7 @@ class PagesController extends AbstractController
       'title' => 'contact',
     ]);
   }
+
   #[Route('/cgu', name: 'page_cgu')]
   public function cgu(): Response
   {
