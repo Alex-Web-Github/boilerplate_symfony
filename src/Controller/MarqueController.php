@@ -3,19 +3,22 @@
 namespace App\Controller;
 
 use App\Entity\Marque;
+use App\Form\MarqueType;
 use App\Repository\MarqueRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+
+#[Route('/marque')]
+
 class MarqueController extends AbstractController
 {
 
   // Create Read(All ou 1 en particulier) Update Delete
-
-
-  #[Route('/marque', name: 'marque_index', methods: ['GET'])]
+  #[Route('/', name: 'marque_index', methods: ['GET'])]
   public function index(MarqueRepository $repo): Response
   {
     //dd(__METHOD__); // means Dump & Die
@@ -25,40 +28,79 @@ class MarqueController extends AbstractController
     ]);
   }
 
-  #[Route('/marque/{id}', name: 'marque_show', requirements: ['id' => '\d+'], methods: ['GET'])]
+  #[Route('/{id}', name: 'marque_show', requirements: ['id' => '\d+'], methods: ['GET'])]
   public function show(Marque $marque): Response
   {
-    //dd(__METHOD__); // Dump & Die
-    //dd($request->attributes->get('id'));
-    // dd($repo->find($request->attributes->get('id')));
-    // dd($repo->find($id));
-    // dd($id);
-    // dd($marque);
 
     return $this->render('marque/show.html.twig', [
       'marque' => $marque,
     ]);
   }
 
-  #[Route('/marque/create', name: 'marque_create', methods: ['GET', 'POST'])]
-  public function create(): Response
+  #[Route('/marque/create', name: 'marque_create', priority: 0, methods: ['GET', 'POST'])]
+  public function create(Request $request, MarqueRepository $repo): Response
   {
-    dd(__METHOD__); // Dump & Die
 
+    $marque = new Marque();
 
+    $form = $this->createForm(MarqueType::class, $marque);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+      $repo->save($marque, true);
+      // Ici insérer un message pour confirmer la bonne création de la Marque
+      return $this->redirectToRoute('marque_index');
+    }
+
+    return $this->render('marque/create.html.twig', [
+      'formView' => $form->createView(),
+    ]);
   }
 
-  #[Route('/marque/{id}/edit', name: 'marque_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
-  public function update(): Response
-  {
-    dd(__METHOD__); // Dump & Die
 
+  // public function create(Request $request, EntityManagerInterface $entityManager): Response
+  // {
+  //   // dd(__METHOD__); // Dump & Die
+  //   $marque = new Marque();
+
+  //   $form = $this->createForm(MarqueType::class, $marque);
+  //   // gestion des données transmises ($request) par le formulaire
+  //   $form->handleRequest($request);
+
+  //   if ($form->isSubmitted() && $form->isValid()) {
+  //     $entityManager->persist($marque);
+  //     $entityManager->flush();
+  //     return $this->redirectToRoute('marque_index');
+  //   }
+
+  //   // Affichage de la Vue du Formulaire d'Ajout
+  //   return $this->render('marque/create.html.twig', [
+  //     'formView' => $form->createView(),
+  //   ]);
+  // }
+
+  #[Route('/{id}/edit', name: 'marque_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
+  public function update(Marque $marque, Request $request, MarqueRepository $repo): Response
+  {
+    // dd(__METHOD__); // Dump & Die
+    $form = $this->createForm(MarqueType::class, $marque);
+    $form->handleRequest($request);
+    if ($form->isSubmitted() && $form->isValid()) {
+      $repo->save($marque, true);
+
+      return $this->redirectToRoute('marque_index');
+    }
+
+    // Affichage de la Vue du Formulaire d'Ajout
+    return $this->render('marque/edit.html.twig', [
+      'formView' => $form->createView(),
+    ]);
   }
 
-  #[Route('/marque/{id}/delete', name: 'marque_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
-  public function delete(): Response
+  #[Route('/{id}/delete', name: 'marque_delete', requirements: ['id' => '\d+'], methods: ['GET'])]
+  public function delete(Marque $marque, MarqueRepository $repo): Response
   {
-    dd(__METHOD__); // Dump & Die
-
+    $repo->remove($marque, true);
+    return $this->redirectToRoute('marque_index');
   }
 }

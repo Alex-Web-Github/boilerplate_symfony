@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+  Marques
+{% endblock %}
+
+{% block body %}
+  <h1>Modification d'une marque</h1>
+
+  {% include 'marque/_form.html.twig' %}
+
+  <a href="{{ path('marque_index') }}" class="btn btn-primary mt-3">Retour à la liste</a>
+{% endblock %}

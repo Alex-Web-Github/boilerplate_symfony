@@ -2,10 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\MarqueRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\MarqueRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+// use Symfony\Component\Validator\Constraints\Length;
+// use Symfony\Component\Validator\Constraints\NotBlank;
+use symfony\component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: MarqueRepository::class)]
 class Marque
@@ -16,6 +19,18 @@ class Marque
   private ?int $id = null;
 
   #[ORM\Column(length: 32)]
+  #[Assert\NotBlank(message: 'Saisir une Marque SVP')]
+  #[Assert\Length(
+    min: 3,
+    minMessage: 'La marque doit contenir au moins {{ limit }} caractères',
+    max: 32,
+    maxMessage: 'La marque ne doit pas dépasser {{ limit }} caractères'
+  )]
+  #[Assert\Regex(
+    pattern: '/^[a-zA-Z\s-]+$/',
+    message: 'La marque ne doit contenir que des lettres, des espaces et des tirets'
+  )]
+
   private ?string $libelle = null;
 
   #[ORM\OneToMany(mappedBy: 'marque', targetEntity: modele::class)]
@@ -23,7 +38,7 @@ class Marque
 
   public function __construct()
   {
-      $this->modeles = new ArrayCollection();
+    $this->modeles = new ArrayCollection();
   }
 
   public function getId(): ?int
@@ -49,28 +64,28 @@ class Marque
    */
   public function getModeles(): Collection
   {
-      return $this->modeles;
+    return $this->modeles;
   }
 
   public function addModele(modele $modele): static
   {
-      if (!$this->modeles->contains($modele)) {
-          $this->modeles->add($modele);
-          $modele->setMarque($this);
-      }
+    if (!$this->modeles->contains($modele)) {
+      $this->modeles->add($modele);
+      $modele->setMarque($this);
+    }
 
-      return $this;
+    return $this;
   }
 
   public function removeModele(modele $modele): static
   {
-      if ($this->modeles->removeElement($modele)) {
-          // set the owning side to null (unless already changed)
-          if ($modele->getMarque() === $this) {
-              $modele->setMarque(null);
-          }
+    if ($this->modeles->removeElement($modele)) {
+      // set the owning side to null (unless already changed)
+      if ($modele->getMarque() === $this) {
+        $modele->setMarque(null);
       }
+    }
 
-      return $this;
+    return $this;
   }
 }
